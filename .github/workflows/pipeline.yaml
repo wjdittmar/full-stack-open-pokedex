@@ -49,8 +49,9 @@ jobs:
         needs: [test]
         steps:
             - name: Deploy
-              # do not need to deploy when there is a pull request
-              if: ${{ github.event_name != 'push' }}
+              # only deploy when the pull request is merged
+              # very confusing syntax
+              if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ', '),'#skip')}}
               env:
                   deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
               run: |
@@ -64,8 +65,9 @@ jobs:
                   fetch-depth: '0'
             - name: Bump version and push tag
               uses: anothrNick/github-tag-action@1.64.0
-              # do not need to bump the patch number if this is just a pull request
-              if: ${{ github.event_name != 'push' }}
+              # only bump the patch number if we are doing a merge
+              # conrfusiing syntax -- push refers to a merged pull request
+              if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ', '),'#skip')}}
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   DEFAULT_BUMP: patch
