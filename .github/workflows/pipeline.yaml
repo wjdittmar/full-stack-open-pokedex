@@ -64,13 +64,24 @@ jobs:
               with:
                   fetch-depth: '0'
             - name: Bump version and push tag
-              uses: anothrNick/github-tag-action@1.64.0
+              if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ', '),'#skip')}}
+              uses: anothrNick/github-tag-action@8c8163ef62cf9c4677c8e800f36270af27930f42
               # only bump the patch number if we are doing a merge
-              # conrfusiing syntax -- push refers to a merged pull request
+              # confusing syntax -- push refers to a merged pull request
               env:
-                  GITHUB_ENAME: ${{ toJson(github.event_name) }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   DEFAULT_BUMP: patch
-            - run: |
-                  echo "$GITHUB_ENAME"
-              if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ', '),'#skip')}}
+            - name: Test Success
+              uses: rjstone/discord-webhook-notify@v1
+              if: success()
+              with:
+                  severity: info
+                  details: Test Succeeded!
+                  webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
+            - name: Test Failure
+              uses: rjstone/discord-webhook-notify@v1
+              if: failure()
+              with:
+                  severity: error
+                  details: Test Failed!
+                  webhookUrl: ${{ secrets.DISCORD_WEBHOOK }}
