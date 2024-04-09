@@ -4,6 +4,9 @@ on:
     push:
         branches:
             - main
+    pull_request:
+        branches: [main]
+        types: [opened, synchronize]
 
 jobs:
     build_pipeline:
@@ -41,7 +44,11 @@ jobs:
                   name: playwright-report
                   path: playwright-report/
                   retention-days: 30
+    deploy:
+        runs-on: ubuntu-20.04
+        steps:
             - name: Deploy
+              if: ${{ github.event_name == 'push' }}
               env:
                   deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
               run: |
