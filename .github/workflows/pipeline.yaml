@@ -71,6 +71,6 @@ jobs:
                   GITHUB_ENAME: ${{ toJson(github.event_name) }}
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   DEFAULT_BUMP: patch
-              run: |
+            - run: |
                   echo "$GITHUB_ENAME"
               if: ${{ github.event_name == 'push' && !contains(join(github.event.commits.*.message, ', '),'#skip')}}
