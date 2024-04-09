@@ -59,6 +59,9 @@ jobs:
         needs: [test]
         runs-on: ubuntu-20.04
         steps:
+            - uses: actions/checkout@v2
+              with:
+                  fetch-depth: '0'
             - name: Bump version and push tag
               uses: anothrNick/github-tag-action@1.64.0
               # do not need to bump the patch number if this is just a pull request
