@@ -46,10 +46,26 @@ jobs:
                   retention-days: 30
     deploy:
         runs-on: ubuntu-20.04
+        needs: [test]
         steps:
             - name: Deploy
-              if: ${{ github.event_name == 'push' }}
+              # do not need to deploy when there is a pull request
+              if: ${{ github.event_name != 'push' }}
               env:
                   deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
               run: |
                   curl "$deploy_url"
+    tag_release:
+        needs: [test]
+        runs-on: ubuntu-20.04
+        steps:
+            - uses: actions/checkout@v2
+              with:
+                  fetch-depth: '0'
+            - name: Bump version and push tag
+              uses: anothrNick/github-tag-action@1.64.0
+              # do not need to bump the patch number if this is just a pull request
+              if: ${{ github.event_name != 'push' }}
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  DEFAULT_BUMP: patch
